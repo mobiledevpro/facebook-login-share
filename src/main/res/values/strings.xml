@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Facebook Helper</string>
+    <string name="message_pages_list_empty">You have no Facebook Pages where you are admin. Please, create at least one page.</string>
+
+    <string name="dialog_title_select_page">Select page</string>
+    <string name="button_cancel">Cancel</string>
 </resources>

@@ -1,5 +1,10 @@
 package com.mobiledevpro.facebook;
 
+import android.app.Application;
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+
 /**
  * Interface for Facebook helper
  * <p>
@@ -11,4 +16,18 @@ package com.mobiledevpro.facebook;
  */
 
 public interface IFBLoginShareHelper {
+
+    interface IFBLoginResultCallbacks {
+        void onSuccess(String accessToken, String name);
+
+        void onFail(String message);
+    }
+
+    void init(Application app, String appID);
+
+    void loginAsPageAdmin(Fragment fragment, @NonNull IFBLoginResultCallbacks outCallbacks);
+
+    void onLoginResult(int requestCode, int resultCode, Intent data);
+
+    void logout();
 }
