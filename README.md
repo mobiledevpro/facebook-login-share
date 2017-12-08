@@ -36,9 +36,9 @@ dependencies {
 
 ## Login. Get access to Facebook Page to publish content.
 
-* From fragment:
+* Start login from fragment:
 ```java
-FBLoginShareHelper.getInstance().loginAsPageAdmin((Fragment) mView, new IFBLoginShareHelper.IFBLoginResultCallbacks() {
+FBLoginShareHelper.getInstance().loginAsPageAdmin(fragment, new IFBLoginShareHelper.IFBLoginResultCallbacks() {
     @Override
     public void onSuccess(String accessToken, final String userOrPageName, String userOrPageId) {
        //here your code
@@ -51,6 +51,23 @@ FBLoginShareHelper.getInstance().loginAsPageAdmin((Fragment) mView, new IFBLogin
     }
 });
 ```
+
+* Handle result from onActivityResult() in the fragment:
+```java
+@Override
+public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    switch (requestCode) {
+        ................
+        ................
+        ................
+            
+        case FBLoginShareHelper.REQUEST_CODE:
+            FBLoginShareHelper.getInstance().onLoginResult(requestCode, resultCode, data);
+            break;
+    }
+}
+```
+
 
 ![ezgif-5-5ed0eacacb](https://user-images.githubusercontent.com/5750211/33781034-acdaa16a-dc5b-11e7-9de4-3a554aaa173f.gif)
 
