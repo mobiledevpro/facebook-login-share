@@ -18,7 +18,7 @@ import android.support.v4.app.Fragment;
 public interface IFBLoginShareHelper {
 
     interface IFBLoginResultCallbacks {
-        void onSuccess(String accessToken, String name);
+        void onSuccess(String accessToken, String userOrPageName, String userOrPageId);
 
         void onFail(String message);
     }

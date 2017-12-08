@@ -75,6 +75,7 @@ class FBGraphApiHelper {
                 pageObject = jsonArray.getJSONObject(i);
 
                 fbAccount = new FBAccount(
+                        pageObject.getString("id"),
                         pageObject.getString("name"),
                         pageObject.getString("access_token")
                 );
@@ -110,7 +111,8 @@ class FBGraphApiHelper {
                         FBAccount fbAccount = accountsList.get(which);
                         loginResultCallbacks.onSuccess(
                                 fbAccount.getAccessToken(),
-                                fbAccount.getName()
+                                fbAccount.getName(),
+                                fbAccount.getId()
                         );
                     }
                 })

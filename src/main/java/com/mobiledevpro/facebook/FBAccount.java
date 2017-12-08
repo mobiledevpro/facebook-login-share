@@ -11,12 +11,18 @@ package com.mobiledevpro.facebook;
  */
 
 class FBAccount {
+    private String id;
     private String name;
     private String accessToken;
 
-    FBAccount(String name, String accessToken) {
+    FBAccount(String id, String name, String accessToken) {
+        this.id = id;
         this.name = name;
         this.accessToken = accessToken;
+    }
+
+    public String getId() {
+        return id;
     }
 
     String getName() {
