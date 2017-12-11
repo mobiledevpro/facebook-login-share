@@ -2,6 +2,7 @@ package com.mobiledevpro.facebook;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -14,6 +15,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
@@ -58,6 +64,55 @@ class FBGraphApiHelper {
         request.executeAsync();
     }
 
+
+    /**
+     * Upload video to Facebook
+     *
+     * @param accessToken      AccessToken
+     * @param userOrPageId     User's or Page's ID
+     * @param videoFile        Local Video File
+     * @param videoTitle       Video Title
+     * @param videoDescription Video Description
+     * @param callbacks        IFBVideoUploadResultCallbacks
+     */
+    static void uploadVideoAsync(AccessToken accessToken,
+                                 String userOrPageId,
+                                 @NonNull File videoFile,
+                                 String videoTitle,
+                                 String videoDescription,
+                                 @NonNull final IFBLoginShareHelper.IFBVideoUploadResultCallbacks callbacks) {
+        final GraphRequest request = GraphRequest.newPostRequest(
+                accessToken,
+                "/" + userOrPageId + "/videos",
+                null,
+                new GraphRequest.Callback() {
+                    @Override
+                    public void onCompleted(GraphResponse response) {
+                        //Success: {Response:  responseCode: 200, graphObject: {"id":"199207940626593"}, error: null}
+                        FBResponse fbResponse = parseUploadResponse(response);
+                        if (fbResponse.isSuccess()) {
+                            callbacks.onSuccess();
+                        } else {
+                            callbacks.onFail(fbResponse.getMessage());
+                        }
+                    }
+                }
+        );
+
+        Bundle params = request.getParameters();
+        try {
+            final byte[] fileData = readBytes(videoFile);
+            params.putByteArray(videoFile.getName(), fileData);
+            params.putString("title", videoTitle);
+            params.putString("description", videoDescription);
+            request.setParameters(params);
+            request.executeAsync();
+        } catch (Exception e) {
+            Log.e(FBGraphApiHelper.class.getSimpleName(), "FBGraphApiHelper.uploadVideoAsync: Exception - " + e.getLocalizedMessage(), e);
+            callbacks.onFail("Facebook upload video error: " + e.getLocalizedMessage());
+        }
+    }
+
     /**
      * Parse accounts/pages list
      *
@@ -87,6 +142,31 @@ class FBGraphApiHelper {
         }
 
         return pagesList;
+    }
+
+    /**
+     * Parse upload response
+     *
+     * @param graphResponse GraphResponse
+     * @return FBResponse
+     */
+    private static FBResponse parseUploadResponse(GraphResponse graphResponse) {
+        FBResponse fbResponse;
+
+        String response = graphResponse.toString();
+        response = response.replaceAll("Response:", "");
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            int respCode = jsonObject.getInt("responseCode");
+            String respMessage = jsonObject.getString("error");
+            fbResponse = new FBResponse(respCode, respMessage);
+
+        } catch (JSONException e) {
+            Log.e(FBLoginShareHelper.class.getSimpleName(), "FBLoginShareHelper.parseUploadResponse: JSONException - " + e.getLocalizedMessage(), e);
+            fbResponse = new FBResponse(400, "Facebook upload exception: " + e.getLocalizedMessage());
+        }
+
+        return fbResponse;
     }
 
     /**
@@ -123,5 +203,20 @@ class FBGraphApiHelper {
                     }
                 });
         builder.create().show();
+    }
+
+    private static byte[] readBytes(@NonNull File file) throws IOException {
+
+        InputStream inputStream = new FileInputStream(file.getAbsoluteFile());
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+
+        int len;
+        while ((len = inputStream.read(buffer)) != -1) {
+            byteBuffer.write(buffer, 0, len);
+        }
+
+        return byteBuffer.toByteArray();
     }
 }

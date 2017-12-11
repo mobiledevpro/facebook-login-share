@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -13,6 +14,7 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 
+import java.io.File;
 import java.util.Arrays;
 
 /**
@@ -118,4 +120,31 @@ public class FBLoginShareHelper implements IFBLoginShareHelper {
         mLoginCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    public void uploadVideoToPageAsync(String accessToken,
+                                       String userOrPageId,
+                                       @NonNull File localVideoFile,
+                                       String videoTitle,
+                                       String videoDescription,
+                                       @NonNull IFBVideoUploadResultCallbacks callbacks) {
+        AccessToken token = new AccessToken(
+                accessToken,
+                AccessToken.getCurrentAccessToken().getApplicationId(),
+                userOrPageId,
+                Arrays.asList(FBPermissions.PAGES_PUBLISH_ACCESS),
+                null,
+                AccessToken.getCurrentAccessToken().getSource(),
+                AccessToken.getCurrentAccessToken().getExpires(),
+                AccessToken.getCurrentAccessToken().getLastRefresh()
+        );
+
+        FBGraphApiHelper.uploadVideoAsync(
+                token,
+                userOrPageId,
+                localVideoFile,
+                videoTitle,
+                videoDescription,
+                callbacks
+        );
+    }
 }

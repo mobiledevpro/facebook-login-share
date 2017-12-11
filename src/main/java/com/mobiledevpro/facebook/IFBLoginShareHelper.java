@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 
+import java.io.File;
+
 /**
  * Interface for Facebook helper
  * <p>
@@ -23,6 +25,12 @@ public interface IFBLoginShareHelper {
         void onFail(String message);
     }
 
+    interface IFBVideoUploadResultCallbacks {
+        void onSuccess();
+
+        void onFail(String message);
+    }
+
     void init(Application app, String appID);
 
     void loginAsPageAdmin(Fragment fragment, @NonNull IFBLoginResultCallbacks outCallbacks);
@@ -30,4 +38,11 @@ public interface IFBLoginShareHelper {
     void onLoginResult(int requestCode, int resultCode, Intent data);
 
     void logout();
+
+    void uploadVideoToPageAsync(String accessToken,
+                                String userOrPageId,
+                                @NonNull File localVideoFile,
+                                String videoTitle,
+                                String videoDescription,
+                                @NonNull IFBVideoUploadResultCallbacks callbacks);
 }
