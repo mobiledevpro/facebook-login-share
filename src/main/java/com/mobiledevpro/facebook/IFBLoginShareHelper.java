@@ -26,7 +26,7 @@ public interface IFBLoginShareHelper {
     }
 
     interface IFBVideoUploadResultCallbacks {
-        void onSuccess();
+        void onSuccess(String postUrl);
 
         void onFail(String message);
     }

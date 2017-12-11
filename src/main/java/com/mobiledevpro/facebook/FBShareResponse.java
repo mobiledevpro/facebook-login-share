@@ -12,13 +12,18 @@ import android.text.TextUtils;
  * #MobileDevPro
  */
 
-class FBResponse {
+class FBShareResponse {
+
+    public static final String FB_ADDRESS = "https://fb.com";
+    
     private int respCode;
     private String respMessage;
+    private String postId;
 
-    FBResponse(int respCode, String respMessage) {
+    FBShareResponse(int respCode, String respMessage, String postId) {
         this.respCode = respCode;
         this.respMessage = respMessage;
+        this.postId = postId;
     }
 
     boolean isSuccess() {
@@ -27,5 +32,11 @@ class FBResponse {
 
     String getMessage() {
         return !TextUtils.isEmpty(respMessage) ? respMessage : "Facebook response error: Something went wrong";
+    }
+
+    public String getPostUrl(String graphPath) {
+        return !TextUtils.isEmpty(postId) && !TextUtils.isEmpty(graphPath)
+                ? FB_ADDRESS + graphPath + postId + "/"
+                : "";
     }
 }

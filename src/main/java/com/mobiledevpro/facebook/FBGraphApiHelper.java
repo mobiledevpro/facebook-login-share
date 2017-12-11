@@ -89,9 +89,13 @@ class FBGraphApiHelper {
                     @Override
                     public void onCompleted(GraphResponse response) {
                         //Success: {Response:  responseCode: 200, graphObject: {"id":"199207940626593"}, error: null}
-                        FBResponse fbResponse = parseUploadResponse(response);
+                        FBShareResponse fbResponse = parseUploadResponse(response);
                         if (fbResponse.isSuccess()) {
-                            callbacks.onSuccess();
+                            callbacks.onSuccess(
+                                    fbResponse.getPostUrl(
+                                            response.getRequest().getGraphPath()
+                                    )
+                            );
                         } else {
                             callbacks.onFail(fbResponse.getMessage());
                         }
@@ -150,8 +154,8 @@ class FBGraphApiHelper {
      * @param graphResponse GraphResponse
      * @return FBResponse
      */
-    private static FBResponse parseUploadResponse(GraphResponse graphResponse) {
-        FBResponse fbResponse;
+    private static FBShareResponse parseUploadResponse(GraphResponse graphResponse) {
+        FBShareResponse fbResponse;
 
         String response = graphResponse.toString();
         response = response.replaceAll("Response:", "");
@@ -159,11 +163,17 @@ class FBGraphApiHelper {
             JSONObject jsonObject = new JSONObject(response);
             int respCode = jsonObject.getInt("responseCode");
             String respMessage = jsonObject.getString("error");
-            fbResponse = new FBResponse(respCode, respMessage);
+            JSONObject graphObject = jsonObject.getJSONObject("graphObject");
+            String postId = "";
+            if (graphObject != null) {
+                postId = graphObject.getString("id");
+            }
+
+            fbResponse = new FBShareResponse(respCode, respMessage, postId);
 
         } catch (JSONException e) {
             Log.e(FBLoginShareHelper.class.getSimpleName(), "FBLoginShareHelper.parseUploadResponse: JSONException - " + e.getLocalizedMessage(), e);
-            fbResponse = new FBResponse(400, "Facebook upload exception: " + e.getLocalizedMessage());
+            fbResponse = new FBShareResponse(400, "Facebook upload exception: " + e.getLocalizedMessage(), null);
         }
 
         return fbResponse;
