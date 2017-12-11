@@ -77,3 +77,26 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
 ```java
 FBLoginShareHelper.getInstance().logout();
 ```
+
+##Upload video to Facebook page.
+
+```java
+FBLoginShareHelper.getInstance().uploadVideoToPageAsync(
+    "[page access token string]",
+    "[page id]",
+    [video file here],
+    "[Video title here]",
+    "[Video description here]",
+    new IFBLoginShareHelper.IFBVideoUploadResultCallbacks() {
+        @Override
+        public void onSuccess() {
+              //your code
+        }
+
+        @Override
+         public void onFail(String message) {
+              //your code
+         }
+    }
+);
+```
