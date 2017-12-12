@@ -8,15 +8,29 @@ android {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
+        project.archivesBaseName = "com.mobiledevpro.library.facebook-login-share"
+        project.version = android.defaultConfig.versionName
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.aar')) {
+                def fileName = "${archivesBaseName}" + "-v$version" + "-" + variant.buildType.name + ".aar";
+                output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
+
+    publishNonDefault true
 
 }
 
