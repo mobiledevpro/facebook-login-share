@@ -14,7 +14,7 @@ import android.text.TextUtils;
 
 class FBShareResponse {
 
-    public static final String FB_ADDRESS = "https://fb.com";
+    private static final String FB_ADDRESS = "https://fb.com";
     
     private int respCode;
     private String respMessage;
@@ -34,7 +34,7 @@ class FBShareResponse {
         return !TextUtils.isEmpty(respMessage) ? respMessage : "Facebook response error: Something went wrong";
     }
 
-    public String getPostUrl(String graphPath) {
+    String getPostUrl(String graphPath) {
         return !TextUtils.isEmpty(postId) && !TextUtils.isEmpty(graphPath)
                 ? FB_ADDRESS + graphPath + "/" + postId + "/"
                 : "";
