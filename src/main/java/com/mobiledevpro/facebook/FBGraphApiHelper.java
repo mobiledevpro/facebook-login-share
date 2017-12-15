@@ -15,11 +15,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
@@ -162,10 +160,14 @@ class FBGraphApiHelper {
         try {
             JSONObject jsonObject = new JSONObject(response);
             int respCode = jsonObject.getInt("responseCode");
-            String respMessage = jsonObject.getString("error");
+            String respMessage = "";
+            if (jsonObject.has("error") && !(jsonObject.get("error") instanceof JSONObject)) {
+                respMessage = jsonObject.getString("error");
+            }
+
             JSONObject graphObject = jsonObject.getJSONObject("graphObject");
             String postId = "";
-            if (graphObject != null) {
+            if (graphObject != null && graphObject.has("id")) {
                 postId = graphObject.getString("id");
             }
 
@@ -216,17 +218,17 @@ class FBGraphApiHelper {
     }
 
     private static byte[] readBytes(@NonNull File file) throws IOException {
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(file);
+            byte fileContent[] = new byte[(int) file.length()];
+            fileInputStream.read(fileContent);
 
-        InputStream inputStream = new FileInputStream(file.getAbsoluteFile());
-        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-
-        byte[] buffer = new byte[1024];
-
-        int len;
-        while ((len = inputStream.read(buffer)) != -1) {
-            byteBuffer.write(buffer, 0, len);
+            return fileContent;
+        } finally {
+            if (fileInputStream != null) {
+                fileInputStream.close();
+            }
         }
-
-        return byteBuffer.toByteArray();
     }
 }
