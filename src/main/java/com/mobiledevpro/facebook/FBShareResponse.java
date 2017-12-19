@@ -36,7 +36,7 @@ class FBShareResponse {
 
     String getPostUrl(String graphPath) {
         return !TextUtils.isEmpty(postId) && !TextUtils.isEmpty(graphPath)
-                ? FB_ADDRESS + graphPath + "/" + postId + "/"
+                ? FB_ADDRESS + "/" + graphPath + "/" + postId + "/"
                 : "";
     }
 }

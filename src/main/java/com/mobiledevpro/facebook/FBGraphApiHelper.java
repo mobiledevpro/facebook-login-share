@@ -2,22 +2,27 @@ package com.mobiledevpro.facebook;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Bundle;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.facebook.AccessToken;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.share.Sharer;
+import com.facebook.share.internal.VideoUploader;
+import com.facebook.share.model.ShareVideo;
+import com.facebook.share.model.ShareVideoContent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /**
@@ -74,43 +79,47 @@ class FBGraphApiHelper {
      * @param callbacks        IFBVideoUploadResultCallbacks
      */
     static void uploadVideoAsync(AccessToken accessToken,
-                                 String userOrPageId,
+                                 final String userOrPageId,
                                  @NonNull File videoFile,
                                  String videoTitle,
                                  String videoDescription,
                                  @NonNull final IFBLoginShareHelper.IFBVideoUploadResultCallbacks callbacks) {
-        final GraphRequest request = GraphRequest.newPostRequest(
-                accessToken,
-                "/" + userOrPageId + "/videos",
-                null,
-                new GraphRequest.Callback() {
-                    @Override
-                    public void onCompleted(GraphResponse response) {
-                        //Success: {Response:  responseCode: 200, graphObject: {"id":"199207940626593"}, error: null}
-                        FBShareResponse fbResponse = parseUploadResponse(response);
-                        if (fbResponse.isSuccess()) {
-                            callbacks.onSuccess(
-                                    fbResponse.getPostUrl(
-                                            response.getRequest().getGraphPath()
-                                    )
-                            );
-                        } else {
-                            callbacks.onFail(fbResponse.getMessage());
+
+        AccessToken.setCurrentAccessToken(accessToken);
+
+        ShareVideo.Builder shareVideoBuilder = new ShareVideo.Builder();
+        shareVideoBuilder.setLocalUrl(Uri.fromFile(videoFile));
+
+        ShareVideoContent.Builder builder = new ShareVideoContent.Builder();
+        builder.setContentDescription(videoDescription)
+                .setContentTitle(videoTitle)
+                .setVideo(shareVideoBuilder.build());
+
+        ShareVideoContent videoContent = builder.build();
+
+        try {
+            VideoUploader.uploadAsync(
+                    videoContent,
+                    userOrPageId,
+                    new FacebookCallback<Sharer.Result>() {
+                        @Override
+                        public void onSuccess(Sharer.Result result) {
+                            FBShareResponse response = new FBShareResponse(200, "", result.getPostId());
+                            callbacks.onSuccess(response.getPostUrl(userOrPageId));
+                        }
+
+                        @Override
+                        public void onCancel() {
+                            callbacks.onFail("Facebook upload cancelled");
+                        }
+
+                        @Override
+                        public void onError(FacebookException error) {
+                            callbacks.onFail("Facebook upload video error: " + error.getLocalizedMessage());
                         }
                     }
-                }
-        );
-
-        Bundle params = request.getParameters();
-        try {
-            final byte[] fileData = readBytes(videoFile);
-            params.putByteArray(videoFile.getName(), fileData);
-            params.putString("title", videoTitle);
-            params.putString("description", videoDescription);
-            request.setParameters(params);
-            request.executeAsync();
-        } catch (Exception e) {
-            Log.e(FBGraphApiHelper.class.getSimpleName(), "FBGraphApiHelper.uploadVideoAsync: Exception - " + e.getLocalizedMessage(), e);
+            );
+        } catch (FileNotFoundException e) {
             callbacks.onFail("Facebook upload video error: " + e.getLocalizedMessage());
         }
     }
@@ -215,20 +224,5 @@ class FBGraphApiHelper {
                     }
                 });
         builder.create().show();
-    }
-
-    private static byte[] readBytes(@NonNull File file) throws IOException {
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream(file);
-            byte fileContent[] = new byte[(int) file.length()];
-            fileInputStream.read(fileContent);
-
-            return fileContent;
-        } finally {
-            if (fileInputStream != null) {
-                fileInputStream.close();
-            }
-        }
     }
 }
