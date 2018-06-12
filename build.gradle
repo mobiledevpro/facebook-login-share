@@ -34,11 +34,11 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
     // Facebook Login only
-    compile 'com.facebook.android:facebook-login:4.28.0'
+    implementation 'com.facebook.android:facebook-login:4.29.0'
 
     // Facebook Share only
-    compile 'com.facebook.android:facebook-share:4.28.0'
+    implementation 'com.facebook.android:facebook-share:4.29.0'
 }
